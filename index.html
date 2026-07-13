@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>kaaninho's mp3</title>
+    <link rel="stylesheet" href="src/css/style.css">
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <div class="player-container">
+            <div class="window-nav">
+                <button class="nav-icon" id="min-btn">-</button>
+                <button class="nav-icon" id="close-btn">×</button>
+            </div>
+
+            <div style="position: absolute; left: 20px; top: 18px; display: flex; gap: 8px; z-index: 50;">
+                <button id="yt-toggle-btn" class="yt-icon-btn">YT</button>
+                <button id="list-toggle-btn" class="yt-icon-btn" style="background: #6c5ce7;">LIST</button>
+            </div>
+
+            <div class="header">
+                <div class="pill-title">
+                    <h2 id="song-title">kaaninho's mp3</h2>
+                </div>
+            </div>
+
+            <div class="visual-area">
+                <div class="screen-frame">
+                    <div class="display-box" id="water-game-container">
+                        <canvas id="game-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="theme-dots" style="display: flex; justify-content: space-between; width: 100%;">
+                    <div style="display: flex; gap: 8px;">
+                        <div class="theme-dot" style="background:#e2d5e7;" data-theme="default" title="Default"></div>
+                        <div class="theme-dot" style="background:#fdcb6e;" data-theme="yellow" title="Yellow"></div>
+                        <div class="theme-dot" style="background:#ffcccc;" data-theme="pink" title="Pink"></div>
+                        <div class="theme-dot" style="background:#64bff3;" data-theme="blue" title="Blue"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="yt-panel" class="yt-panel hidden">
+                <div class="yt-search-box">
+                    <input type="text" id="yt-search-input" placeholder="Search YouTube...">
+                    <button id="yt-clear-btn" style="color: #ff4757; font-size: 14px;" title="Clear Search">🗑</button>
+                    <button id="yt-search-btn">🔍</button>
+                </div>
+                <div id="yt-results" class="yt-results-list">
+                    <p style="font-size: 8px; color: #7a6a81; text-align:center; margin-top:20px;">SEARCH TO PLAY</p>
+                </div>
+                <button id="yt-close-btn">CLOSE PANEL</button>
+            </div>
+
+            <div class="controls-area">
+                <div class="time-row">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+                <input type="range" id="progress-bar" value="0" min="0" max="100" step="0.1">
+
+                <div class="main-btns">
+                    <button id="fav-btn" class="heart-btn">❤</button> 
+                    <button class="nav-btn" id="restart-btn">⏮</button>
+                    <div class="play-shell">
+                        <button id="play-btn">▶</button>
+                    </div>
+                    <button class="nav-btn" id="add-btn">⏭</button>
+                    <button class="nav-btn" id="local-file-btn" style="font-size: 16px;">📂</button>
+                </div>
+
+                <div class="utility-row">
+                    <button id="loop-btn">🔁</button>
+                    <div class="vol-wrapper">
+                        <input type="range" id="volume-slider" min="0" max="100" step="2" value="50">
+                    </div>
+                    <button id="shuffle-btn">🔀</button>
+                </div>
+
+                <div class="fx-grid">
+                    <button class="fx-btn" id="slow-btn">SLOW</button>
+                    <button class="fx-btn" id="speed-btn">SPEED</button>
+                    <button class="fx-btn" id="reverb-btn">REVERB</button>
+                    <button class="fx-btn" id="bass-btn">BASS</button>
+                    <button class="fx-btn" id="8d-btn">8D</button>
+                    <button class="fx-btn" id="muffle-btn">MUFFLE</button>
+                </div>
+            </div>
+
+            <input type="file" id="file-input" accept="audio/*" style="display: none;">
+        </div>
+
+        <div id="playlist-sidebar" class="playlist-sidebar">
+            <div style="width: 100%; padding: 15px; height: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
+                <div id="playlists-grid-view" style="display: flex; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden;">
+                    <h3 style="text-align: center; color: #6c5ce7; margin: 10px 0; white-space: nowrap;">PLAYLISTS</h3>
+                    <div id="playlists-grid" class="playlists-grid" style="flex-grow: 1;">
+                    </div>
+                </div>
+
+                <div id="playlist-detail-view" style="display: none; flex-direction: column; height: 100%; padding-right: 5px; overflow-y: auto;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin: 10px 0;">
+                        <button id="back-to-grid-btn" style="padding: 0; background: transparent; border: none; color: #6c5ce7; cursor: pointer; font-size: 16px; font-weight: bold; min-width: 20px;">&lt;</button>
+                        <h3 id="current-playlist-title" style="color: #6c5ce7; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; text-align: left;">List Name</h3>
+                    </div>
+                    <div id="fav-list" class="yt-results-list" style="height: 100%; padding-right: 5px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-prompt-modal" class="custom-modal hidden">
+        <div class="custom-modal-content">
+            <h3 id="prompt-title" style="margin-top: 0;">Name</h3>
+            <input type="text" id="prompt-input" style="width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box; font-family: inherit; border-radius: 4px; border: 1px solid #888;" />
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="prompt-ok" style="padding: 8px 25px; cursor: pointer; background: #6c5ce7; color: white; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">SAVE</button>
+                <button id="prompt-cancel" style="padding: 8px 25px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="custom-modal hidden">
+        <div class="custom-modal-content">
+            <h3 id="confirm-title" style="margin-top: 0; font-size: 14px;">Are you sure?</h3>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button id="confirm-ok" style="padding: 8px 25px; cursor: pointer; background: #ff4757; color: white; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">YES</button>
+                <button id="confirm-cancel" style="padding: 8px 25px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-to-playlist-modal" class="custom-modal hidden">
+        <div class="custom-modal-content" style="width: 75%; max-width: 330px; max-height: 65vh; padding: 18px; display: flex; flex-direction: column;">
+            <h3 style="margin-top: 0; text-align: center;">ADD TO PLAYLIST</h3>
+            <div id="modal-playlists-grid" class="playlists-grid" style="flex-grow: 1; overflow-y: auto; overflow-x: hidden; margin-bottom: 10px;">
+            </div>
+            <div style="display: flex; justify-content: center;">
+                <button id="close-add-modal-btn" style="padding: 8px 25px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="custom-modal hidden">
+        <div class="custom-modal-content">
+            <h3 id="alert-title" style="margin-top: 0; font-size: 14px; color: #ff4757;">Notice</h3>
+            <p id="alert-message" style="font-size: 12px;"></p>
+            <div style="display: flex; justify-content: center; margin-top: 15px;">
+                <button id="alert-ok" style="padding: 8px 25px; cursor: pointer; background: #6c5ce7; color: white; border: none; border-radius: 4px; font-weight: bold; pointer-events: auto;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/js/game.js"></script>
+    <script src="src/js/renderer.js"></script>
+</body>
+
+</html>
