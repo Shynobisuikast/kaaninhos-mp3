@@ -1,0 +1,39 @@
+{
+  "name": "kaaninhos-mp3",
+  "version": "1.0.0",
+  "description": "A lightweight retro desktop music player.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "Kaan",
+  "license": "ISC",
+  "dependencies": {
+    "yt-search": "^2.10.1"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.kaaninho.mp3",
+    "productName": "kaaninho's mp3",
+    "directories": {
+      "output": "dist_build"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "icon.png",
+      "extraResources": [
+        "yt-dlp.exe"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    }
+  }
+}
