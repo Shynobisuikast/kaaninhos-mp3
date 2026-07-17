@@ -24,7 +24,7 @@
     },
     "win": {
       "target": "portable",
-      "icon": "icon.png",
+      "icon": "assets/icon.png",
       "extraResources": [
         "yt-dlp.exe"
       ]

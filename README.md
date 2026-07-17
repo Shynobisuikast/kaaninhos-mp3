@@ -41,7 +41,8 @@ If you want to look at the code or run it yourself:
 
 1. Clone this repository.
 2. Make sure you have [Node.js](https://nodejs.org/) installed.
-3. Open your terminal in the folder and type:
+3. Download `yt-dlp.exe` and place it in the root folder.
+4. Open your terminal in the folder and type:
 
 ```bash
 npm install
