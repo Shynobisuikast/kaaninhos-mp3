@@ -11,6 +11,16 @@
     --shadow-color: rgba(0, 0, 0, 0.2);
 }
 
+[data-theme="black"] {
+    --bg-color: #2d3436;
+    --border-color: #636e72;
+    --light-bg: #1e272e;
+    --accent-color: #b2bec3;
+    --text-color: #dfe6e9;
+    --heart-color: #ff4757;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
 
 
 

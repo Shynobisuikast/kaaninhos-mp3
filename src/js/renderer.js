@@ -403,6 +403,7 @@ async function playTrack(track) {
         currentTrackData = track;
         el.playBtn.innerText = "❚❚";
         checkFavStatus();
+        preloadNextTrack();
     }
 }
 
