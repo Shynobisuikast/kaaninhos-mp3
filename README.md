@@ -7,7 +7,7 @@
   ![Electron](https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white)
   ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
   ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-  [![Download](https://img.shields.io/badge/Download-.exe-success?style=for-the-badge&logo=windows)](https://github.com/halilkaandogan/kaaninhos-mp3/releases/latest)
+  [![Download](https://img.shields.io/badge/Download_Latest_Version_(v1.0.1)-.exe-success?style=for-the-badge&logo=windows)](https://github.com/halilkaandogan/kaaninhos-mp3/releases/latest)
 </div>
 
 <br/>
@@ -30,7 +30,7 @@ If you like retro designs and just want to listen to music while you do other th
 - **Smart Cache:** The app remembers what you played, so the next song loads instantly without waiting.
 - **Shuffle:** Works perfectly with the cache system.
 - **Audio Effects:** You can use effects like Slow, Speed, Reverb, Bass Boost, 8D Audio, and Muffle.
-- **Themes:** Change colors easily (Default, Green, Yellow, Pink, Blue).
+- **Themes:** Change colors easily (Default, Black, Yellow, Pink, Blue).
 - **Mini-Game:** Play a simple basketball game while listening.
 
 ## Download & Install
