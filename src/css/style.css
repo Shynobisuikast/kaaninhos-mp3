@@ -202,7 +202,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 160px;
+    max-width: 200px;
 }
 
 .heart-btn {
@@ -260,6 +260,19 @@ body {
     background: transparent; 
     z-index: 1000;
     display: flex; justify-content: center; align-items: center;
+    -webkit-app-region: no-drag !important;
+}
+.custom-modal button,
+.card-action-btn,
+.delete-btn,
+.edit-track-btn,
+.yt-icon-btn,
+#yt-close-btn,
+#yt-clear-btn,
+#yt-search-btn {
+    -webkit-app-region: no-drag !important;
+    position: relative;
+    z-index: 10;
 }
 .custom-modal.hidden { display: none; }
 .custom-modal-content {

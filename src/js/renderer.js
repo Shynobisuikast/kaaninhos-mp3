@@ -437,7 +437,7 @@ el.ytClose.onclick = (e) => {
     el.ytPanel.classList.add('hidden');
 };
 
-document.addEventListener('click', (e) => {
+document.addEventListener('dblclick', (e) => {
     if (e.target.classList.contains('custom-modal')) {
         e.target.classList.add('hidden');
         if (e.target === el.promptModal) promptCallback = null;
