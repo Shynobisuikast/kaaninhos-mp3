@@ -6,11 +6,22 @@ const ytSearch = require('yt-search');
 const { exec, spawn } = require('child_process');
 const fs = require('fs');
 
+const isWin = process.platform === 'win32';
+const YT_DLP_NAME = isWin ? 'yt-dlp.exe' : 'yt-dlp';
 const USER_DATA_PATH = app.getPath('userData');
-const YT_DLP_TARGET_PATH = path.join(USER_DATA_PATH, 'yt-dlp.exe');
+const YT_DLP_TARGET_PATH = path.join(USER_DATA_PATH, YT_DLP_NAME);
 
 const streamCache = {};
 const CACHE_EXPIRY = 3600000;
+
+function getExecutablePath() {
+  if (fs.existsSync(YT_DLP_TARGET_PATH)) return YT_DLP_TARGET_PATH;
+  const packagedPath = path.join(process.resourcesPath, YT_DLP_NAME);
+  if (app.isPackaged && fs.existsSync(packagedPath)) return packagedPath;
+  const localPath = path.join(__dirname, YT_DLP_NAME);
+  if (fs.existsSync(localPath)) return localPath;
+  return 'yt-dlp';
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -36,6 +47,10 @@ function createWindow() {
   ipcMain.on('resize-window', (event, width, height) => {
     win.setSize(width, height);
   });
+
+  ipcMain.on('get-user-data-path', (event) => {
+    event.returnValue = USER_DATA_PATH;
+  });
 }
 
 ipcMain.handle('yt-search-list', async (event, query) => {
@@ -59,10 +74,7 @@ ipcMain.handle('yt-get-stream', async (event, videoUrl) => {
     return { success: true, url: streamCache[videoUrl].url };
   }
 
-  const ytDlpExecutable = fs.existsSync(YT_DLP_TARGET_PATH)
-    ? YT_DLP_TARGET_PATH
-    : (app.isPackaged ? path.join(process.resourcesPath, 'yt-dlp.exe') : path.join(__dirname, 'yt-dlp.exe'));
-
+  const ytDlpExecutable = getExecutablePath();
   const command = `"${ytDlpExecutable}" -f bestaudio -g "${videoUrl}"`;
 
   return new Promise((resolve) => {
@@ -87,8 +99,8 @@ app.whenReady().then(() => {
 
   try {
     const sourcePath = app.isPackaged
-      ? path.join(process.resourcesPath, 'yt-dlp.exe')
-      : path.join(__dirname, 'yt-dlp.exe');
+      ? path.join(process.resourcesPath, YT_DLP_NAME)
+      : path.join(__dirname, YT_DLP_NAME);
 
     if (!fs.existsSync(YT_DLP_TARGET_PATH)) {
       if (fs.existsSync(sourcePath)) {
@@ -96,8 +108,9 @@ app.whenReady().then(() => {
       }
     }
 
-    if (fs.existsSync(YT_DLP_TARGET_PATH)) {
-      const updateProcess = spawn(YT_DLP_TARGET_PATH, ['-U'], {
+    const execPath = fs.existsSync(YT_DLP_TARGET_PATH) ? YT_DLP_TARGET_PATH : (fs.existsSync(sourcePath) ? sourcePath : null);
+    if (execPath) {
+      const updateProcess = spawn(execPath, ['-U'], {
         detached: true,
         stdio: 'ignore',
         windowsHide: true

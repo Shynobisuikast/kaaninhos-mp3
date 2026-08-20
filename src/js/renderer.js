@@ -7,7 +7,10 @@ const PlaylistManager = require(path.join(__dirname, 'src', 'js', 'playlist.js')
 const player = new AudioManager();
 const playlistMgr = new PlaylistManager();
 
+let queue = [];
 let currentTrackData = null;
+let lastPlaylistTrack = null;
+let lastPlaylistId = null;
 let isPlaylistOpen = false;
 let isPlaylistDragging = false;
 
@@ -26,6 +29,13 @@ const el = {
     listToggle: document.getElementById('list-toggle-btn'),
     playlistSidebar: document.getElementById('playlist-sidebar'),
     favList: document.getElementById('fav-list'),
+    tabQueueBtn: document.getElementById('tab-queue-btn'),
+    queueContainer: document.getElementById('queue-container'),
+    queueList: document.getElementById('queue-list'),
+    clearQueueBtn: document.getElementById('clear-queue-btn'),
+    tabPlaylistBtn: document.getElementById('tab-playlists-btn'),
+    playlistContainer: document.getElementById('playlists-container'),
+    queueBackBtn: document.getElementById('queue-back-btn'),
 
     playlistsGridView: document.getElementById('playlists-grid-view'),
     playlistDetailView: document.getElementById('playlist-detail-view'),
@@ -83,9 +93,53 @@ const el = {
     addBtn: document.getElementById('add-btn')
 };
 
-function showPrompt(title, defaultValue, callback) {
+
+if (el.tabQueueBtn) {
+    el.tabQueueBtn.onclick = () => {
+        el.tabQueueBtn.classList.add('active');
+        el.tabQueueBtn.style.background = '#6c5ce7';
+        el.tabQueueBtn.style.color = 'white';
+        if (el.tabPlaylistBtn) {
+            el.tabPlaylistBtn.classList.remove('active');
+            el.tabPlaylistBtn.style.background = 'transparent';
+            el.tabPlaylistBtn.style.color = '#6c5ce7';
+        }
+        el.queueContainer.style.display = 'flex';
+        if (el.playlistContainer) el.playlistContainer.style.display = 'none';
+        renderQueue();
+    };
+}
+if (el.tabPlaylistBtn) {
+    el.tabPlaylistBtn.onclick = () => {
+        el.tabPlaylistBtn.classList.add('active');
+        el.tabPlaylistBtn.style.background = '#6c5ce7';
+        el.tabPlaylistBtn.style.color = 'white';
+        if (el.tabQueueBtn) {
+            el.tabQueueBtn.classList.remove('active');
+            el.tabQueueBtn.style.background = 'transparent';
+            el.tabQueueBtn.style.color = '#6c5ce7';
+        }
+        if (el.playlistContainer) el.playlistContainer.style.display = 'flex';
+        el.queueContainer.style.display = 'none';
+    };
+}
+if (el.queueBackBtn) {
+    el.queueBackBtn.onclick = () => {
+        if (el.tabPlaylistBtn) el.tabPlaylistBtn.click();
+    };
+}
+if (el.clearQueueBtn) {
+    el.clearQueueBtn.onclick = () => {
+        queue = [];
+        renderQueue();
+    };
+}
+
+function showPrompt(title, defaultValue, callback, maxLength = null) {
     el.promptTitle.innerText = title;
     el.promptInput.value = defaultValue || "";
+    if (maxLength) el.promptInput.setAttribute('maxlength', maxLength);
+    else el.promptInput.removeAttribute('maxlength');
     el.promptModal.classList.remove('hidden');
     promptCallback = callback;
     el.promptInput.focus();
@@ -158,10 +212,10 @@ function renderPlaylistsGrid() {
         if (isPlaylistDragging) return;
         showPrompt("New Playlist Name:", "", (name) => {
             if (name && name.trim()) {
-                playlistMgr.createPlaylist(name.trim());
+                playlistMgr.createPlaylist(name.trim().substring(0, 12));
                 renderPlaylistsGrid();
             }
-        });
+        }, 12);
     };
     el.playlistsGrid.appendChild(addCard);
 
@@ -172,7 +226,7 @@ function renderPlaylistsGrid() {
         
         card.innerHTML = `
             <button class="card-action-btn edit" title="Rename">✏️</button>
-            <button class="card-action-btn delete" title="Delete">🗑</button>
+            <button class="card-action-btn delete" title="Delete">❌</button>
             <div class="playlist-card-icon" style="pointer-events: none;">🎵</div>
             <div class="playlist-card-title" style="pointer-events: none;">${p.name}</div>
             <div style="font-size: 8px; color: #888; margin-top: 2px; pointer-events: none;">${p.tracks.length} tracks</div>
@@ -221,11 +275,11 @@ function renderPlaylistsGrid() {
             if (e.target.classList.contains('edit')) {
                 showPrompt("Rename Playlist:", p.name, (newName) => {
                     if (newName && newName.trim()) {
-                        p.name = newName.trim();
+                        p.name = newName.trim().substring(0, 12);
                         playlistMgr.save();
                         renderPlaylistsGrid();
                     }
-                });
+                }, 12);
                 return;
             }
             if (e.target.classList.contains('delete')) {
@@ -278,13 +332,20 @@ function renderPlaylistDetail() {
         const div = document.createElement('div');
         div.className = 'fav-item';
         div.draggable = true;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        
+        let isCurrent = (currentTrackData && currentTrackData.url === track.url);
+        let indicator = isCurrent ? '▶️ ' : '';
+
         div.innerHTML = `
-            <div style="flex-grow:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
-                ${index + 1}. ${track.title}
+            <div style="flex-grow:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color: ${isCurrent ? '#6c5ce7' : 'inherit'}; font-weight: ${isCurrent ? 'bold' : 'normal'};">
+                ${indicator}${index + 1}. ${track.title}
             </div>
-            <div style="display: flex; gap: 5px;">
-                <button class="edit-track-btn" style="background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 4px; padding: 4px 6px; cursor: pointer; font-size: 8px;" title="Rename">✏️</button>
-                <button class="delete-btn" style="background: #ff4757; color: white; border: none; border-radius: 4px; padding: 4px 6px; cursor: pointer; font-size: 8px;" title="Remove">🗑</button>
+            <div style="display: flex; gap: 2px; align-items: center;">
+                <button class="add-queue-btn" style="background: transparent; border: none; cursor: pointer; font-size: 11px; padding: 2px;" title="Add to Queue">➕</button>
+                <button class="edit-track-btn" style="background: transparent; border: none; cursor: pointer; font-size: 11px; padding: 2px;" title="Rename">✏️</button>
+                <button class="delete-btn" style="background: transparent; border: none; cursor: pointer; font-size: 11px; padding: 2px;" title="Remove">❌</button>
             </div>
         `;
 
@@ -305,8 +366,8 @@ function renderPlaylistDetail() {
         };
 
         div.onclick = (e) => {
-            if (e.target.closest('.delete-btn') || e.target.closest('.edit-track-btn')) return;
-            playTrack(track);
+            if (e.target.closest('.delete-btn') || e.target.closest('.edit-track-btn') || e.target.closest('.add-queue-btn')) return;
+            playTrack(track, playlistMgr.activeId, false);
         };
 
         const editBtn = div.querySelector('.edit-track-btn');
@@ -337,6 +398,17 @@ function renderPlaylistDetail() {
                 }
             });
         };
+
+        
+        const qBtn = div.querySelector('.add-queue-btn');
+        if (qBtn) {
+            qBtn.onclick = (e) => {
+                e.stopPropagation();
+                queue.push(track);
+                renderQueue();
+                if (queue.length === 1 && !currentTrackData) playNext();
+            };
+        }
 
         el.favList.appendChild(div);
     });
@@ -373,7 +445,16 @@ el.listToggle.onclick = () => {
     }
 };
 
-async function playTrack(track) {
+async function playTrack(track, forcePlaylistId = null, isFromQueue = false) {
+    if (!isFromQueue) {
+        let pId = forcePlaylistId || playlistMgr.activeId;
+        let p = playlistMgr.getPlaylist(pId);
+        let list = p ? p.tracks : [];
+        if (list.some(t => t.url === track.url)) {
+            lastPlaylistTrack = track;
+            lastPlaylistId = pId;
+        }
+    }
     el.title.innerText = "LOADING...";
     el.title.classList.remove('scrolling');
     
@@ -391,6 +472,8 @@ async function playTrack(track) {
             el.playBtn.innerText = "❚❚";
             checkFavStatus();
             preloadNextTrack();
+            renderPlaylistDetail();
+            renderQueue();
         } else {
             showCustomAlert("Broken link or no internet.", "Error");
             el.title.innerText = "ERROR";
@@ -404,6 +487,8 @@ async function playTrack(track) {
         el.playBtn.innerText = "❚❚";
         checkFavStatus();
         preloadNextTrack();
+        renderPlaylistDetail();
+        renderQueue();
     }
 }
 
@@ -495,36 +580,56 @@ el.ytSearchBtn.onclick = async () => {
     const query = el.ytInput.value;
     if (!query) return;
 
+    el.ytResults.innerHTML = '<p style="text-align:center; font-size:10px; margin-top:20px;">Searching...</p>';
+    
     try {
-        el.ytResults.innerHTML = '<p style="text-align:center; margin-top:20px; font-size:8px;">SEARCHING...</p>';
         const videos = await ipcRenderer.invoke('yt-search-list', query);
         el.ytResults.innerHTML = '';
-
+        
         if (!videos || videos.length === 0) {
-            el.ytResults.innerHTML = '<p style="text-align:center; font-size:8px;">NO RESULTS</p>';
+            el.ytResults.innerHTML = '<p style="text-align:center; font-size:10px; margin-top:20px;">NO RESULTS</p>';
             return;
         }
 
         videos.forEach(v => {
             const div = document.createElement('div');
             div.className = 'yt-item';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            
+            const isFav = playlistMgr.getAllPlaylists().some(p => p.tracks.some(t => t.url === v.url));
             
             div.innerHTML = `
                 <img src="${v.thumbnail}" referrerpolicy="no-referrer" class="yt-thumb" style="width:40px; height:30px; object-fit:cover; border-radius:4px;">
-                <div style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><div style="margin-bottom:2px;">${v.title.substring(0, 30)}...</div><div style="color:#888;">${v.timestamp}</div></div>
-                <button class="heart-btn add-fav-btn" style="font-size: 14px; padding: 5px;">❤</button>
+                <div style="flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 4px;"><div style="margin-bottom:2px;">${v.title.substring(0, 30)}...</div><div style="color:#888;">${v.timestamp}</div></div>
+                <div style="display: flex; gap: 2px; align-items: center;">
+                    <button class="heart-btn add-queue-btn-yt" style="font-size: 11px; padding: 2px;" title="Add to Queue">➕</button>
+                    <button class="heart-btn add-fav-btn ${isFav ? 'active' : ''}" style="font-size: 13px; padding: 2px;">❤</button>
+                </div>
             `;
             
             div.onclick = (e) => {
-                if(e.target.classList.contains('add-fav-btn')) return;
+                if(e.target.closest('.add-fav-btn') || e.target.closest('.add-queue-btn-yt')) return;
                 playTrack({ title: v.title, url: v.url, type: 'youtube' });
             };
             
+            const ytQBtn = div.querySelector('.add-queue-btn-yt');
+            if (ytQBtn) {
+                ytQBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    queue.push({ title: v.title, url: v.url, type: 'youtube' });
+                    renderQueue();
+                    if (queue.length === 1 && !currentTrackData) playNext();
+                };
+            }
+            
             const heartBtn = div.querySelector('.add-fav-btn');
-            heartBtn.onclick = (e) => {
-                e.stopPropagation();
-                openAddTrackModal({ title: v.title, url: v.url, type: 'youtube' });
-            };
+            if (heartBtn) {
+                heartBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openAddTrackModal({ title: v.title, url: v.url, type: 'youtube' });
+                };
+            }
             
             el.ytResults.appendChild(div);
         });
@@ -544,56 +649,70 @@ let preloadedNextTrackData = null;
 let isShuffleEnabled = false;
 
 function preloadNextTrack() {
-    const list = playlistMgr.getAll();
-    if (list.length === 0 || !currentTrackData) return;
+    if (queue.length > 0) {
+        if (queue[0].type === 'youtube') ipcRenderer.invoke('yt-get-stream', queue[0].url).catch(() => {});
+        return;
+    }
+    const pId = lastPlaylistId || playlistMgr.activeId;
+    const p = playlistMgr.getPlaylist(pId);
+    if (!p || p.tracks.length === 0) return;
+    const list = p.tracks;
     let nextTrack = null;
-    
+    let refTrack = lastPlaylistTrack || currentTrackData;
+    if (!refTrack) return;
     if (isShuffleEnabled) {
         if (list.length > 1) {
             let rIdx = Math.floor(Math.random() * list.length);
-            while (list[rIdx].url === currentTrackData.url) {
-                rIdx = Math.floor(Math.random() * list.length);
-            }
+            while (list[rIdx].url === refTrack.url) rIdx = Math.floor(Math.random() * list.length);
             nextTrack = list[rIdx];
-        } else {
-            nextTrack = list[0];
-        }
+        } else nextTrack = list[0];
     } else {
-        const idx = list.findIndex(t => t.url === currentTrackData.url);
+        const idx = list.findIndex(t => t.url === refTrack.url);
         if (idx !== -1 && idx < list.length - 1) nextTrack = list[idx + 1];
         else if (idx === list.length - 1) nextTrack = list[0];
     }
-    
     preloadedNextTrackData = nextTrack;
-    if (nextTrack && nextTrack.type === 'youtube') {
-        ipcRenderer.invoke('yt-get-stream', nextTrack.url).catch(() => {});
-    }
+    if (nextTrack && nextTrack.type === 'youtube') ipcRenderer.invoke('yt-get-stream', nextTrack.url).catch(() => {});
 }
 
 function playNext() {
-    const list = playlistMgr.getAll();
-    if (list.length === 0) return;
+    if (queue.length > 0) {
+        const nextTrack = queue.shift();
+        renderQueue();
+        playTrack(nextTrack, null, true);
+        return;
+    }
+    const pId = lastPlaylistId || playlistMgr.activeId;
+    const p = playlistMgr.getPlaylist(pId);
+    if (!p || p.tracks.length === 0) return;
+    const list = p.tracks;
     
     if (preloadedNextTrackData && list.some(t => t.url === preloadedNextTrackData.url)) {
-        playTrack(preloadedNextTrackData);
+        playTrack(preloadedNextTrackData, pId, false);
     } else {
         if (isShuffleEnabled) {
             let rIdx = Math.floor(Math.random() * list.length);
-            playTrack(list[rIdx]);
+            playTrack(list[rIdx], pId, false);
         } else {
-            if (!currentTrackData) return;
-            const idx = list.findIndex(t => t.url === currentTrackData.url);
-            if (idx !== -1 && idx < list.length - 1) playTrack(list[idx + 1]);
-            else playTrack(list[0]);
+            let refTrack = lastPlaylistTrack || currentTrackData;
+            if (!refTrack) return;
+            const idx = list.findIndex(t => t.url === refTrack.url);
+            if (idx !== -1 && idx < list.length - 1) playTrack(list[idx + 1], pId, false);
+            else playTrack(list[0], pId, false);
         }
     }
 }
 
 function playPrev() {
-    const list = playlistMgr.getAll();
-    if (list.length === 0 || !currentTrackData) return;
-    const idx = list.findIndex(t => t.url === currentTrackData.url);
-    if (idx > 0) playTrack(list[idx - 1]);
+    const pId = lastPlaylistId || playlistMgr.activeId;
+    const p = playlistMgr.getPlaylist(pId);
+    if (!p || p.tracks.length === 0) return;
+    const list = p.tracks;
+    let refTrack = lastPlaylistTrack || currentTrackData;
+    if (!refTrack) return;
+    const idx = list.findIndex(t => t.url === refTrack.url);
+    if (idx > 0) playTrack(list[idx - 1], pId, false);
+    else playTrack(list[list.length - 1], pId, false);
 }
 
 if (el.addBtn) el.addBtn.onclick = playNext;
@@ -668,3 +787,74 @@ function formatTime(s) {
 player.setVolume(el.vol.value / 100);
 
 renderPlaylistsGrid();
+function renderQueue() {
+    if (!el.queueList) return;
+    el.queueList.innerHTML = '';
+    
+    if (currentTrackData) {
+        const div = document.createElement('div');
+        div.className = 'yt-item';
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        div.innerHTML = `
+            <div style="flex-grow:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color: #6c5ce7; font-weight: bold; padding: 4px 0;">
+                ▶️ ${currentTrackData.title}
+            </div>
+        `;
+        el.queueList.appendChild(div);
+    }
+    
+    if (queue.length === 0 && !currentTrackData) {
+        el.queueList.innerHTML = '<p style="text-align:center; font-size:10px; margin-top:20px;">QUEUE EMPTY</p>';
+        return;
+    }
+    
+    queue.forEach((track, index) => {
+        const div = document.createElement('div');
+        div.className = 'yt-item';
+        div.draggable = true;
+        div.style.display = 'flex';
+        div.style.alignItems = 'center';
+        
+        div.innerHTML = `
+            <div style="flex-grow:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color: inherit; font-weight: normal; padding: 4px 0;">
+                ${index + 1}. ${track.title}
+            </div>
+            <button class="delete-btn" style="background:transparent; color:white; border:none; padding:4px 6px; font-size:11px; opacity:0.7; cursor:pointer;" title="Remove">❌</button>
+        `;
+
+        div.ondragstart = (e) => {
+            e.dataTransfer.setData('text/plain', 'queue_' + index);
+            div.style.opacity = '0.5';
+        };
+        div.ondragend = () => div.style.opacity = '1';
+        div.ondragover = (e) => e.preventDefault();
+        div.ondrop = (e) => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('text/plain');
+            if (data.startsWith('queue_')) {
+                const fromIndex = parseInt(data.replace('queue_', ''));
+                if (fromIndex !== index) {
+                    const movedItem = queue.splice(fromIndex, 1)[0];
+                    queue.splice(index, 0, movedItem);
+                    renderQueue();
+                    preloadNextTrack();
+                }
+            }
+        };
+
+        div.onclick = (e) => {
+            if (e.target.closest('.delete-btn')) {
+                e.stopPropagation();
+                queue.splice(index, 1);
+                renderQueue();
+                preloadNextTrack();
+                return;
+            }
+            const t = queue.splice(index, 1)[0];
+            renderQueue();
+            playTrack(t, null, true);
+        };
+        el.queueList.appendChild(div);
+    });
+}

@@ -1,5 +1,13 @@
 node_modules/
 dist_build/
+dist/
+release-builds/
+*.exe
+*.patch
+*.log
+*.old
 .env
 .DS_Store
-yt-dlp.exe
+Thumbs.db
+.vscode/
+.idea/

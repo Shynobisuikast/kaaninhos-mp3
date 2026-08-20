@@ -21,7 +21,7 @@ const wallBounce = -0.5;
 let lastWinX = window.screenX, lastWinY = window.screenY;
 
 const ball = {
-    x: width / 3, y: height - 30,
+    x: width / 3, y: height - 20,
     vx: 0, vy: 0,
     radius: 9 * scale,
     color: '#ff7f50', lineColor: '#8b4500',

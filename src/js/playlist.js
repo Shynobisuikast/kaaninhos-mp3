@@ -1,26 +1,46 @@
+const fs = require('fs');
+const path = require('path');
+const { ipcRenderer } = require('electron');
+
 class PlaylistManager {
     constructor() {
-        const stored = localStorage.getItem('myPlaylists');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-                this.playlists = [
-                    { id: 'default', name: 'My Playlist', tracks: parsed }
-                ];
-            } else {
+        this.userDataPath = ipcRenderer.sendSync('get-user-data-path');
+        this.jsonPath = path.join(this.userDataPath, 'playlists.json');
+        
+        let loaded = false;
+        if (fs.existsSync(this.jsonPath)) {
+            try {
+                const fileData = fs.readFileSync(this.jsonPath, 'utf8');
+                const parsed = JSON.parse(fileData);
                 this.playlists = parsed.playlists || [{ id: 'default', name: 'My Playlist', tracks: [] }];
-            }
-        } else {
-            const oldList = JSON.parse(localStorage.getItem('myPlaylist'));
-            if (oldList && Array.isArray(oldList)) {
-                this.playlists = [{ id: 'default', name: 'My Playlist', tracks: oldList }];
-            } else {
-                this.playlists = [{ id: 'default', name: 'My Playlist', tracks: [] }];
+                this.activeId = parsed.activeId || this.playlists[0].id;
+                loaded = true;
+            } catch (e) {
+                console.error("Error reading playlists.json", e);
             }
         }
-
-        this.activeId = localStorage.getItem('activePlaylistId') || this.playlists[0].id;
         
+        if (!loaded) {
+            const stored = localStorage.getItem('myPlaylists');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    this.playlists = [{ id: 'default', name: 'My Playlist', tracks: parsed }];
+                } else {
+                    this.playlists = parsed.playlists || [{ id: 'default', name: 'My Playlist', tracks: [] }];
+                }
+            } else {
+                const oldList = JSON.parse(localStorage.getItem('myPlaylist'));
+                if (oldList && Array.isArray(oldList)) {
+                    this.playlists = [{ id: 'default', name: 'My Playlist', tracks: oldList }];
+                } else {
+                    this.playlists = [{ id: 'default', name: 'My Playlist', tracks: [] }];
+                }
+            }
+            this.activeId = localStorage.getItem('activePlaylistId') || this.playlists[0].id;
+            this.save();
+        }
+
         if (!this.getPlaylist(this.activeId)) {
             this.activeId = this.playlists[0].id;
         }
@@ -56,6 +76,7 @@ class PlaylistManager {
         if (this.getPlaylist(id)) {
             this.activeId = id;
             localStorage.setItem('activePlaylistId', id);
+            this.save();
         }
     }
 
@@ -78,6 +99,12 @@ class PlaylistManager {
 
     save() {
         localStorage.setItem('myPlaylists', JSON.stringify({ playlists: this.playlists }));
+        localStorage.setItem('activePlaylistId', this.activeId);
+        try {
+            fs.writeFileSync(this.jsonPath, JSON.stringify({ playlists: this.playlists, activeId: this.activeId }), 'utf8');
+        } catch (e) {
+            console.error("Error saving playlists.json", e);
+        }
     }
 
     getAll() {
