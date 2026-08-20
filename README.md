@@ -50,6 +50,12 @@ npm install
 npm start
 ```
 
+> **Note for Linux / npm 10+ users:** If you encounter `Error: Electron failed to install correctly...`, run:
+> ```bash
+> npm rebuild electron
+> npm start
+> ```
+
 To build the `.exe` file:
 ```bash
 npm run dist
