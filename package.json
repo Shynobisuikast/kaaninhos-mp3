@@ -20,6 +20,7 @@
     "appId": "com.kaaninho.mp3",
     "productName": "kaaninho's mp3",
     "artifactName": "kaaninho's mp3.exe",
+    "compression": "maximum",
     "directories": {
       "output": "dist_build"
     },
