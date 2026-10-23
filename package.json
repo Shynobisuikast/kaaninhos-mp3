@@ -1,7 +1,7 @@
 {
   "name": "kaaninhos-mp3",
   "version": "1.0.3",
-  "description": "A lightweight retro desktop music player.",
+  "description": "kaaninho's mp3",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
