@@ -13,9 +13,9 @@
 <br/>
 
 ## About
-I made **kaaninho's mp3** because I wanted a small, simple music player for my desktop. There are no ads or complex menus. It just plays music directly from YouTube with a cool pixel-art style. 
+I made **kaaninho's mp3** because I wanted a small, simple music player for my desktop. There are no ads or complex menus. It plays music directly from YouTube or your local files with a cool pixel-art style.
 
-If you like retro designs and just want to listen to music while you do other things, you will like this!
+If you like retro designs and just want to listen to music while studying or gaming, you will like this!
 
 <div align="center">
   <img src="assets/screenshot1.png" alt="Main View" width="300" style="border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.2);">
@@ -26,11 +26,13 @@ If you like retro designs and just want to listen to music while you do other th
 
 ## Features
 - **Search & Play:** Search for any song on YouTube and listen instantly.
-- **Queue System:** Add tracks to queue from search or playlists, reorder songs with drag-and-drop, and let playback smoothly resume your playlist afterwards.
-- **Playlists:** Create your own playlists and drag-and-drop songs.
-- **Smart Cache:** The app remembers what you played, so the next song loads instantly without waiting.
-- **Shuffle:** Works perfectly with the cache system.
-- **Audio Effects:** You can use effects like Slow, Speed, Reverb, Bass Boost, 8D Audio, and Muffle.
+- **Mini Player:** Keep a tiny, resizable square player always on top while gaming or browsing, with album art and ambient glow.
+- **Local MP3 Files:** Play your own music files with automatic album cover support.
+- **Queue System:** Add tracks to queue, reorder them with drag-and-drop, and manage Up Next easily.
+- **Playlists:** Create your own playlists and organize your favorite songs.
+- **Audio Effects:** Apply effects like Slow, Speed, Reverb, Bass Boost, 8D Audio, and Muffle with one click.
+- **Smart Cache:** Fast song loading and zero lag with automatic stream caching.
+- **Global Shortcuts:** Control music while in other apps or games (`Alt + P` to Play/Pause, `Alt + Right` / `Alt + Left` for Next/Prev, `Alt + +` / `Alt + -` to adjust volume smoothly).
 - **Themes:** Change colors easily (Default, Black, Yellow, Pink, Blue).
 - **Mini-Game:** Play a simple basketball game while listening.
 
@@ -38,12 +40,12 @@ If you like retro designs and just want to listen to music while you do other th
 You don't need to install anything! Just download the `.exe` file from the **[Releases](https://github.com/halilkaandogan/kaaninhos-mp3/releases/latest)** page and open it.
 
 ## For Developers
-If you want to look at the code or run it yourself:
+If you want to run the project from source:
 
 1. Clone this repository.
 2. Make sure you have [Node.js](https://nodejs.org/) installed.
 3. Download `yt-dlp.exe` and place it in the root folder.
-4. Open your terminal in the folder and type:
+4. Open your terminal in the folder and run:
 
 ```bash
 npm install
@@ -56,7 +58,10 @@ npm start
 > npm start
 > ```
 
-To build the `.exe` file:
+To build the standalone `.exe` file:
 ```bash
 npm run dist
 ```
+
+## License
+MIT
