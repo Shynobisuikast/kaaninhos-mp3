@@ -11,6 +11,7 @@
     <div class="app-wrapper">
         <div class="player-container">
             <div class="window-nav">
+                <button class="nav-icon" id="pip-toggle-btn" title="Mini Player" style="font-size: 13px;">◱</button>
                 <button class="nav-icon" id="min-btn">-</button>
                 <button class="nav-icon" id="close-btn">×</button>
             </div>
@@ -91,6 +92,88 @@
             </div>
 
             <input type="file" id="file-input" accept="audio/*" style="display: none;">
+        </div>
+
+        <div id="pip-player-container" class="pip-player-container" style="display: none;">
+            <img id="pip-ambient-glow" class="pip-ambient-glow" src="assets/icon.png" alt="" aria-hidden="true">
+            <div class="pip-header">
+                <div class="pip-drag-zone">
+                    <span class="pip-logo-dot"></span>
+                    <span class="pip-title-text">kaaninho's mp3</span>
+                </div>
+                <div class="pip-nav-btns">
+                    <button class="pip-nav-btn" id="pip-expand-btn" title="Expand to Normal Player">⤢</button>
+                    <button class="pip-nav-btn" id="pip-close-btn" title="Close">×</button>
+                </div>
+            </div>
+
+            <div class="pip-cover-wrapper" id="pip-cover-wrapper">
+                <img id="pip-cover-img" class="pip-cover-img" src="assets/icon.png" alt="Cover Art" referrerpolicy="no-referrer">
+                
+                <div class="pip-hover-overlay" id="pip-hover-overlay">
+                    <div class="pip-controls-row">
+                        <div class="pip-controls-side pip-controls-left">
+                            <div class="pip-vol-group">
+                                <button class="pip-ctrl-btn" id="pip-mute-btn">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                                </button>
+                                <div class="pip-vol-slider-wrap">
+                                    <input type="range" class="pip-vol-slider" id="pip-vol-slider" min="0" max="100" value="50">
+                                </div>
+                            </div>
+                            <button class="pip-ctrl-btn" id="pip-shuffle-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                            </button>
+                            <button class="pip-ctrl-btn" id="pip-prev-btn">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                            </button>
+                        </div>
+                        <button class="pip-main-play-btn" id="pip-play-btn">
+                            <svg id="pip-play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <div class="pip-controls-side pip-controls-right">
+                            <button class="pip-ctrl-btn" id="pip-next-btn">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                            </button>
+                            <button class="pip-ctrl-btn" id="pip-loop-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                            </button>
+                            <button class="pip-ctrl-btn pip-fx-trigger" id="pip-fx-btn">FX</button>
+                        </div>
+                    </div>
+
+                    <div class="pip-fx-popover hidden" id="pip-fx-popover">
+                        <button class="pip-fx-btn" id="pip-fx-slow">SLOW</button>
+                        <button class="pip-fx-btn" id="pip-fx-speed">SPEED</button>
+                        <button class="pip-fx-btn" id="pip-fx-reverb">REVERB</button>
+                        <button class="pip-fx-btn" id="pip-fx-bass">BASS</button>
+                        <button class="pip-fx-btn" id="pip-fx-8d">8D</button>
+                        <button class="pip-fx-btn" id="pip-fx-muffle">MUFFLE</button>
+                    </div>
+                </div>
+
+                <div class="pip-cover-progress-wrap">
+                    <div class="pip-time-row">
+                        <span id="pip-current-time">0:00</span>
+                        <span id="pip-duration">0:00</span>
+                    </div>
+                    <input type="range" id="pip-progress-bar" value="0" min="0" max="100" step="0.1">
+                </div>
+            </div>
+
+            <div class="pip-bottom-bar">
+                <div class="pip-info-row">
+                    <div class="pip-song-meta">
+                        <div id="pip-song-title" class="pip-song-title">kaaninho's mp3</div>
+                        <div id="pip-song-artist" class="pip-song-artist">YouTube Audio</div>
+                    </div>
+                </div>
+                <div id="pip-resize-grip" class="pip-resize-grip">
+                    <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+                        <path d="M9 2L2 9M10 5L5 10M10 8L8 10" stroke="#7e7e86" stroke-width="1.4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
         </div>
 
         <div id="playlist-sidebar" class="playlist-sidebar">
