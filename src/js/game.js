@@ -44,7 +44,6 @@ function createBubble(x, y, speed) {
     bubbles.push({ x: x, y: y, speed: speed || (1 + Math.random() * 3), size: Math.random() * 4 * scale });
 }
 
-
 canvas.addEventListener('mousedown', (e) => {
     const r = canvas.getBoundingClientRect();
     const clickX = (e.clientX - r.left) * scale;
@@ -72,7 +71,8 @@ function update() {
     }
 
     const dX = window.screenX - lastWinX; const dY = window.screenY - lastWinY;
-    if (Math.abs(dX) > 0 || Math.abs(dY) > 0) { ball.vx -= dX * 0.1; ball.vy -= dY * 0.1; }
+    if (Math.abs(dX) > 0 && Math.abs(dX) < 50) ball.vx -= dX * 0.1;
+    if (Math.abs(dY) > 0 && Math.abs(dY) < 50) ball.vy -= dY * 0.1;
     lastWinX = window.screenX; lastWinY = window.screenY;
 
     ball.vy += gravity + buoyancy;
@@ -155,5 +155,39 @@ function drawBubblesAndScore() {
     ctx.fillText("PTS:" + score, 15, 25);
 }
 
-function loop() { update(); draw(); requestAnimationFrame(loop); }
-setTimeout(loop, 100);
+let gameAnimId = null;
+
+function loop() {
+    update();
+    draw();
+    gameAnimId = requestAnimationFrame(loop);
+}
+
+function pauseGameLoop() {
+    if (gameAnimId) {
+        cancelAnimationFrame(gameAnimId);
+        gameAnimId = null;
+    }
+}
+
+function resumeGameLoop() {
+    if (gameAnimId) return;
+    lastWinX = window.screenX;
+    lastWinY = window.screenY;
+    ball.vx = 0;
+    ball.vy = 0;
+    gameAnimId = requestAnimationFrame(loop);
+}
+
+window.pauseGameLoop = pauseGameLoop;
+window.resumeGameLoop = resumeGameLoop;
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        pauseGameLoop();
+    } else if (!window.isPipActive) {
+        resumeGameLoop();
+    }
+});
+
+resumeGameLoop();

@@ -36,16 +36,27 @@ class AudioManager {
         this._createImpulse();
 
         this.panInterval = null;
+        this.suspendTimeout = null;
     }
 
     play(url) {
-        if (this.ctx.state === 'suspended') this.ctx.resume();
+        if (this.suspendTimeout) {
+            clearTimeout(this.suspendTimeout);
+            this.suspendTimeout = null;
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
         if (url) this.audio.src = url;
         return this.audio.play();
     }
 
     pause() {
         this.audio.pause();
+        if (this.suspendTimeout) clearTimeout(this.suspendTimeout);
+        this.suspendTimeout = setTimeout(() => {
+            if (this.audio.paused && this.ctx.state === 'running') {
+                this.ctx.suspend().catch(() => {});
+            }
+        }, 2500);
     }
 
     togglePlay() {
@@ -123,9 +134,14 @@ class AudioManager {
         this.audio.onended = callback;
     }
 
+    onError(callback) {
+        this.audio.onerror = callback;
+    }
+
     get duration() { return this.audio.duration; }
     get currentTime() { return this.audio.currentTime; }
     get paused() { return this.audio.paused; }
+    get isPlaying() { return !this.audio.paused; }
     get src() { return this.audio.src; }
 
     set currentTime(val) { this.audio.currentTime = val; }
