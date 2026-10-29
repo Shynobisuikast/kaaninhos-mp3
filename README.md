@@ -52,7 +52,7 @@ npm install
 npm start
 ```
 
-> **Linux:** `yt-dlp` sistem paketinden kurulmalı (ör. `sudo pacman -S yt-dlp` veya `sudo apt install yt-dlp`). Electron ilk `npm start`'ta kendini indirir (internet gerekir).
+> **Linux:** Install `yt-dlp` from your system package manager (e.g., `sudo pacman -S yt-dlp` or `sudo apt install yt-dlp`). Electron downloads its binary automatically on the first `npm start` (internet connection required).
 
 To build the standalone `.exe` file:
 ```bash
