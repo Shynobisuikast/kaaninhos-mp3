@@ -3,7 +3,7 @@ global.File = class File { };
 const { app, BrowserWindow, ipcMain, screen, globalShortcut } = require('electron');
 const path = require('path');
 const ytSearch = require('yt-search');
-const { exec, spawn } = require('child_process');
+const { execFile, spawn } = require('child_process');
 const fs = require('fs');
 
 const isWin = process.platform === 'win32';
@@ -217,12 +217,18 @@ ipcMain.handle('yt-get-stream', async (event, videoUrl, forceRefresh = false) =>
   }
 
   const ytDlpExecutable = getExecutablePath();
-  const command = `"${ytDlpExecutable}" -f bestaudio -g "${videoUrl}"`;
+  const args = ['-f', 'bestaudio', '-g', '--no-playlist', videoUrl];
 
   return new Promise((resolve) => {
-    exec(command, (error, stdout, stderr) => {
+    // execFile + argüman dizisi: shell yorumlaması yok (Linux'ta /bin/sh'a girmez)
+    execFile(ytDlpExecutable, args, { timeout: 60000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
       if (error) {
-        resolve({ success: false, error: "Dönüştürme hatası!" });
+        console.error('[yt-dlp]', stderr || error.message);
+        if (error.code === 'ENOENT') {
+          resolve({ success: false, error: 'yt-dlp bulunamadı. Kurun: sudo pacman -S yt-dlp' });
+        } else {
+          resolve({ success: false, error: 'Dönüştürme hatası!' });
+        }
         return;
       }
       const lines = stdout.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -231,7 +237,7 @@ ipcMain.handle('yt-get-stream', async (event, videoUrl, forceRefresh = false) =>
         addToCache(videoUrl, streamUrl);
         resolve({ success: true, url: streamUrl });
       } else {
-        resolve({ success: false, error: "Link bulunamadı." });
+        resolve({ success: false, error: 'Link bulunamadı.' });
       }
     });
   });
@@ -251,8 +257,8 @@ app.whenReady().then(() => {
       }
     }
 
-    const execPath = fs.existsSync(YT_DLP_TARGET_PATH) ? YT_DLP_TARGET_PATH : (fs.existsSync(sourcePath) ? sourcePath : null);
-    if (execPath) {
+    const execPath = isWin && fs.existsSync(YT_DLP_TARGET_PATH) ? YT_DLP_TARGET_PATH : (fs.existsSync(sourcePath) ? sourcePath : null);
+    if (isWin && execPath) {
       const updateCheckFile = path.join(USER_DATA_PATH, 'last_update_check.json');
       let shouldCheck = true;
       try {

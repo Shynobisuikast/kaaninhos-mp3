@@ -44,7 +44,7 @@ If you want to run the project from source:
 
 1. Clone this repository.
 2. Make sure you have [Node.js](https://nodejs.org/) installed.
-3. Download `yt-dlp.exe` and place it in the root folder.
+3. Windows: download `yt-dlp.exe` into the root folder. Linux: install `yt-dlp` from your package manager.
 4. Open your terminal in the folder and run:
 
 ```bash
@@ -52,11 +52,7 @@ npm install
 npm start
 ```
 
-> **Note for Linux / npm 10+ users:** If you encounter `Error: Electron failed to install correctly...`, run:
-> ```bash
-> npm rebuild electron
-> npm start
-> ```
+> **Linux:** `yt-dlp` sistem paketinden kurulmalı (ör. `sudo pacman -S yt-dlp` veya `sudo apt install yt-dlp`). Electron ilk `npm start`'ta kendini indirir (internet gerekir).
 
 To build the standalone `.exe` file:
 ```bash
